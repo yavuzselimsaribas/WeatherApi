@@ -1,0 +1,5 @@
+rootProject.name = 'patika'
+include 'common'
+include 'web'
+include 'worker'
+
