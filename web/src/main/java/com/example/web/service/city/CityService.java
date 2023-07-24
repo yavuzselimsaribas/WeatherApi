@@ -3,10 +3,11 @@ package com.example.web.service.city;
 import com.example.common.dto.IUnixToDateConverter;
 import com.example.web.model.*;
 import com.example.web.repository.ICityRepository;
-import com.example.web.repository.IRequestRepository;
 import com.example.web.service.coordinate.ICoordinateService;
 import com.example.web.service.request.IRequestService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -59,13 +60,13 @@ public class CityService implements ICityService {
                 allQueueFutures.join();
             }
         } catch (Exception e) {
-            System.out.println(e.toString());
+            throw new RuntimeException("Error while fetching historical city air data", e);
         }
     }
 
 
     private List<DateRange> getMissingDateRanges(String cityName, LocalDate startDate, LocalDate endDate) {
-        List<City> existingData = getHistoricalCityAirData(cityName, startDate, endDate);
+        List<City> existingData = cityRepository.getByCityNameAndCityResults_DateBetween(cityName, startDate.minusDays(1), endDate.plusDays(1));
         List<DateRange> missingDateRanges = new ArrayList<>();
 
         LocalDate currentDate = startDate;
@@ -107,13 +108,12 @@ public class CityService implements ICityService {
 
 
     @Override
-    public List<City> getHistoricalCityAirData(String cityName, LocalDate finalStartDate, LocalDate finalEndDate) {
-        return cityRepository.findByCityNameAndCityResults_DateBetween(cityName, finalStartDate.minusDays(1), finalEndDate.plusDays(1));
+    public Page<City> getHistoricalCityAirData(String cityName, LocalDate finalStartDate, LocalDate finalEndDate, Pageable pageable) {
+        return cityRepository.findByCityNameAndCityResults_DateBetween(cityName, finalStartDate.minusDays(1), finalEndDate.plusDays(1), pageable);
     }
 
     @Override
     public boolean checkRequestStatus(Request request) {
-        //first, check if the requested datas are in the database
         if(cityRepository.existsByCityNameAndCityResults_DateBetween(request.getCityName(), request.getStartDate().minusDays(1), request.getEndDate().plusDays(1)))
         {
             requestService.setReady(request.getId());

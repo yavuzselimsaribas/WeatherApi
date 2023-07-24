@@ -1,6 +1,4 @@
 package com.example.web.controller;
-
-
 import com.example.web.model.City;
 import com.example.web.model.CityResponse;
 import com.example.web.model.Request;
@@ -8,12 +6,12 @@ import com.example.web.model.Status;
 import com.example.web.service.city.ICityService;
 import com.example.web.service.request.IRequestService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("cities")
@@ -23,46 +21,68 @@ public class CityController {
 
     private final IRequestService requestService;
 
-    @PostMapping("{cityName}")
-    public ResponseEntity<CityResponse> createHistoricalCityAirDataRequest(@PathVariable String cityName,
-                                                                           @RequestParam(required = false) LocalDate startDate,
-                                                                           @RequestParam(required = false) LocalDate endDate) {
-        if (startDate == null || endDate == null) {
+    @GetMapping("{cityName}")
+    public ResponseEntity<CityResponse> getHistoricalCityAirData(
+            @PathVariable String cityName,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) int page,
+            @RequestParam(required = false) int size)
+    {
+        if (startDate == null || endDate == null)
+        {
             endDate = LocalDate.now();
             startDate = endDate.minusDays(7);
         }
+        Pageable pageable = PageRequest.of(page, size);
 
-        // First check if there is a request for the same city and dates
-        if (requestService.existsByCityNameAndStartDateAndEndDate(cityName, startDate, endDate)) {
+        // Check if there is an existing request for the same city and dates
+        if (requestService.existsByCityNameAndStartDateAndEndDate(cityName, startDate, endDate))
+        {
             Request request = requestService.findByCityNameAndStartDateAndEndDate(cityName, startDate, endDate);
-            if (request.getStatus() == Status.PENDING) {
+            if (request.getStatus() == Status.PENDING)
+            {
                 // Return the status only if the request is pending
                 return ResponseEntity.ok(CityResponse.builder().status(request.getStatus()).build());
-            } else {
+            }
+            else
+            {
                 // Return the data if the request is ready
-                List<City> cities = cityService.getHistoricalCityAirData(cityName, startDate, endDate);
+                Page<City> cityPage = cityService.getHistoricalCityAirData(cityName, startDate, endDate, pageable);
                 return ResponseEntity.ok(CityResponse.builder()
                         .status(request.getStatus())
-                        .cities(cities)
+                        .cities(cityPage.getContent())
+                        .totalCount(cityPage.getTotalElements())
                         .build());
             }
         }
 
-        // Create a new request entity
-        Request request = Request.builder()
+        // If there is no existing request, create a new one and save it to the repository
+        Request newRequest = Request.builder()
                 .cityName(cityName)
                 .startDate(startDate)
                 .endDate(endDate)
                 .status(Status.PENDING)
                 .build();
+        Request savedRequest = requestService.saveRequest(newRequest);
 
-        // Save the request to the repository
-        Request savedRequest = requestService.saveRequest(request);
-
-        // Trigger the data fetching process
+        // Queue the request for data retrieval
         cityService.fetchHistoricalCityAirData(cityName, startDate, endDate, savedRequest.getId());
 
-        // Return the status since the request is pending
-        return ResponseEntity.ok(CityResponse.builder().status(Status.PENDING).build());
+        // Check if the requested data is ready, if found in the database, then return the data
+        if (savedRequest.getStatus() == Status.READY)
+        {
+            Page<City> cityPage = cityService.getHistoricalCityAirData(cityName, startDate, endDate, pageable);
+            return ResponseEntity.ok(CityResponse.builder()
+                    .status(savedRequest.getStatus())
+                    .cities(cityPage.getContent())
+                    .totalCount(cityPage.getTotalElements())
+                    .build());
+        }
+        else
+        {
+            // If the requested data is not ready, return the status
+            return ResponseEntity.ok(CityResponse.builder().status(savedRequest.getStatus()).build());
+        }
     }
 }

@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,4 +14,5 @@ import java.util.List;
 public class CityResponse {
     private Status status;
     private List<City> cities;
+    private long totalCount; // Add the totalCount field to hold the total count of records
 }

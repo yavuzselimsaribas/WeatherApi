@@ -14,18 +14,18 @@ interface Coordinate {
     lon: number;
 }
 
-interface CityCategories {
-    CO: string;
-    SO2: string;
-    O3: string;
+export interface CityCategories {
+    co: string;
+    so2: string;
+    o3: string;
 }
 
-interface CityResults {
+export interface CityResults {
     date: string;
     cityCategories: CityCategories;
 }
 
-interface City {
+export interface City {
     cityName: string;
     cityResults: CityResults;
 }
@@ -39,6 +39,7 @@ export enum Status {
 export interface CityResponse {
     status: Status;
     cities: City[];
+    totalCount: number;
 }
 
 
@@ -51,10 +52,24 @@ export default {
         return axiosInstance.get(`/coordinates/queue/${cityName}`);
     },
     // Add the new post method here
-    createHistoricalCityAirDataRequest(cityName: string, startDate?: string, endDate?: string): Promise<AxiosResponse<CityResponse>> {
-        const requestData = { startDate, endDate };
-        console.log("Requesting for city: " + cityName +"for dates: " + startDate + " and " + endDate);
-        return axiosInstance.post<CityResponse>(`/cities/${cityName}?startDate=${startDate}&endDate=${endDate}`, );
+    createHistoricalCityAirDataRequest(
+        cityName: string,
+        startDate?: string,
+        endDate?: string,
+        page?: number,      // Add page parameter for pagination
+        pageSize?: number   // Add pageSize parameter for pagination
+    ): Promise<AxiosResponse<CityResponse>> {
+        // Create the query string for the request, including the page and pageSize parameters
+        let queryString = `/cities/${cityName}?startDate=${startDate}&endDate=${endDate}`;
+        if (page !== undefined) {
+            queryString += `&page=${page-1}`;
+        }
+        if (pageSize !== undefined) {
+            queryString += `&size=${pageSize}`;
+        }
+
+        console.log("Requesting for city: " + cityName + " for dates: " + startDate + " and " + endDate);
+        return axiosInstance.get<CityResponse>(queryString);
     }
 
 

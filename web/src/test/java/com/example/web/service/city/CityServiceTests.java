@@ -8,10 +8,11 @@ import com.example.web.repository.ICityRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import static org.assertj.core.api.Assertions.assertThat;
-
 import java.time.LocalDate;
-import java.util.List;
 
 @DataMongoTest
 public class CityServiceTests {
@@ -75,7 +76,8 @@ public class CityServiceTests {
                 ).build();
         cityService.saveCity(city);
         cityService.saveCity(city1);
-        List<City> cities = cityRepository.findByCityNameAndCityResults_DateBetween("Test", LocalDate.of(2021, 5, 16), LocalDate.of(2021, 5, 19));
+        Pageable pageable = PageRequest.of(0, 2);
+        Page<City> cities = cityRepository.findByCityNameAndCityResults_DateBetween("Test", LocalDate.of(2021, 5, 16), LocalDate.of(2021, 5, 19), pageable);
         assertThat(cities).isNotNull();
     }
 
