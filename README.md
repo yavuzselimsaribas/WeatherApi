@@ -49,6 +49,8 @@
 
 ## EXAMPLE RESPONSE
 
+![My-image](common/src/main/resources/Capture.PNG)
+
 ```bson
 {
     "content": [
