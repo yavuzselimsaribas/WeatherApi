@@ -1,5 +1,5 @@
 
-##  <div align="center"><h3 style="color: #007bff">Patika-Dev - OpenWeather API - Spring Boot - Java</h1></div>
+##  <div align="center"><h3 style="color: blue">Patika-Dev - OpenWeather API - Spring Boot - Java</h1></div>
 
     Project Description: It is a spring boot backend - vue3 frontend project that shows historical air quality data of cities, using OpenWeather API, and MongoDB.
 
