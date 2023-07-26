@@ -111,7 +111,15 @@ public class CityService implements ICityService {
 
     @Override
     public void saveCity(City result) {
-        cityRepository.save(result);
+        //if city exists, update it
+        City city = cityRepository.findByCityNameAndCityResults_Date(result.getCityName(), result.getCityResults().getDate());
+        if(city != null){
+            city.setCityResults(result.getCityResults());
+            cityRepository.save(city);
+        }
+        else{
+            cityRepository.save(result);
+        }
     }
 
 

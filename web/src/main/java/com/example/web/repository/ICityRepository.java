@@ -13,4 +13,6 @@ public interface ICityRepository extends MongoRepository<City, String>{
     List<City> getByCityNameAndCityResults_DateBetween(String cityName, LocalDate startDate, LocalDate endDate);
 
     City findByCityName(String cityName);
+
+    City findByCityNameAndCityResults_Date(String cityName, LocalDate date);
 }
