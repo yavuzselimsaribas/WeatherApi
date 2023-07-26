@@ -77,8 +77,8 @@ public class CityServiceTests {
         cityService.saveCity(city);
         cityService.saveCity(city1);
         Pageable pageable = PageRequest.of(0, 2);
-        Page<City> cities = cityRepository.findByCityNameAndCityResults_DateBetween("Test", LocalDate.of(2021, 5, 16), LocalDate.of(2021, 5, 19), pageable);
-        assertThat(cities).isNotNull();
+        Page<City> cities = cityRepository.findByCityNameAndCityResults_DateBetween("Test", LocalDate.of(2021, 5, 17), LocalDate.of(2021, 5, 18), pageable);
+                assertThat(cities).isNotNull();
     }
 
     @Test

@@ -4,7 +4,6 @@ import com.example.common.dto.QueueRequestCityDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.stereotype.Service;
-
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -24,8 +23,21 @@ public class CityQueueService implements ICityQueueService {
                 .endUnix(endUnix)
                 .requestId(requestId)
                 .build();
-        cityRequestQueueTemplate.convertAndSend(queueRequestCityDto);
-        return null;
+
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        try
+        {
+            cityRequestQueueTemplate.convertAndSend(queueRequestCityDto);
+            // If the operation was successful, complete the future
+            future.complete(null);
+        }
+        catch (Exception e)
+        {
+            // If there was an error, complete the future exceptionally with the error
+            future.completeExceptionally(e);
+        }
+
+        return future;
     }
 
     @Override

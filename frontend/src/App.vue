@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <h1>Historical Air Quality Data</h1>
-    <h2>Enter a city name and a date range to get the air quality data for that city</h2>
+   <h2>Enter a city name and a date range to get the air quality data for that city</h2>
     <a-input v-model:value = "cityName" placeholder="Enter a city name" />
     <h3>Cities are restricted to London, Barcelona, Ankara, Tokyo and Mumbai</h3>
     <div class="date-range">
@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import backendApi, {City, CityResponse, Status} from "./api/backend-api";
+import backendApi, {City, CityResponse} from "./api/backend-api";
 import {defineComponent, ref} from "vue";
 
 
@@ -39,7 +39,6 @@ const columns = [
     title: "Date",
     dataIndex: ["cityResults", "date"],
     key: "date",
-    slots: { customRender: "date" },
   },
   {
     title: "CO",
@@ -73,7 +72,7 @@ export default defineComponent({
       pagination: {
         current: currentPage.value,
         pageSize: pageSize.value,
-        total: endDate.value- startDate.value,
+        total: 0,
         showSizeChanger: true,
         showQuickJumper: true,
         showTotal: (total: number) => `Total ${total} items`,
@@ -104,34 +103,49 @@ export default defineComponent({
     const dataSource = ref<City[]>([]); // Use ref for reactive dataSource
     const getAirQualityData = async () => {
       loading.value = true;
-      const maxRetries = 5;
+      const maxRetries = 20;
       let retries = 0;
       let response: CityResponse | null = null;
       while (
-          (!response || response.status === Status.PENDING) &&
+          (!response || !response.cities) &&
           retries < maxRetries
           ) {
-        response = (await backendApi.createHistoricalCityAirDataRequest(
-            cityName.value,
-            startDate.value,
-            endDate.value,
-            currentPage.value, // Send the current page number to the backend
-            pageSize.value // Send the page size to the backend
-        )).data as CityResponse;
+        try {
+          response = (await backendApi.createHistoricalCityAirDataRequest(
+              cityName.value,
+              startDate.value,
+              endDate.value,
+              currentPage.value, // Send the current page number to the backend
+              pageSize.value // Send the page size to the backend
+          )).data as CityResponse;
+        } catch (e) {
+          loading.value = false;
+          console.log(e);
+        }
         if (!response.cities) {
           retries++;
           console.log(`Retrying ${retries} time`);
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
       }
       if (response && response.cities) {
-        // If we have a valid response with cities array, update the data
         dataSource.value = response.cities;
-        state.value.pagination.total = response.totalCount;
+        state.value.pagination.total = calculateTotalCount(
+            startDate.value,
+            endDate.value
+        );
         console.log(response.cities);
       }
       loading.value = false;
     };
+
+    const calculateTotalCount = (startDate: string, endDate: string) => {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) +1;
+    };
+
     return {
       columns,
       cityName,

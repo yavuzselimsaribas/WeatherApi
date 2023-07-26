@@ -8,4 +8,7 @@ public interface IUnixToDateConverter {
     Long convertDateToUnix(LocalDate date);
 
     boolean isFirstHourOfDay(long dt);
+
+    long calculateDateBetween(LocalDate startDate, LocalDate endDate);
+
 }

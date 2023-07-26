@@ -4,10 +4,10 @@ package com.example.web.service.coordinate;
 import com.example.web.model.CityCoordinates;
 import com.example.web.repository.ICoordinateRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.CompletableFuture;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CoordinateService implements ICoordinateService {
@@ -22,10 +22,12 @@ public class CoordinateService implements ICoordinateService {
     }
 
     @Override
-    public void fetchGeocodingInfo(String cityName) {
+    public void fetchGeocodingInfo(String cityName)
+    {
         CityCoordinates cityCoordinates = cityCoordinateRepository.findByCityName(cityName);
-        if (cityCoordinates == null) {
-            System.out.println("City coordinates not found in database for city: " + cityName + ". Queueing request for geocoding info.");
+        if (cityCoordinates == null)
+        {
+            log.info("City coordinates not found in database for city: " + cityName + ". Queueing request for geocoding info.");
             cityQueueService.queueCityGeocodingInfo(cityName);
         }
     }

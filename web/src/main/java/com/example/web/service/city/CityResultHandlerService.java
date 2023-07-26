@@ -5,8 +5,6 @@ import com.example.web.model.*;
 import com.example.web.service.request.IRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,19 +17,15 @@ public class CityResultHandlerService implements ICityResultHandlerService {
 
 
     @Override
-    public void executeMessage(CityDto result) {
+    public void executeMessage(CityDto result)
+    {
         cityService.saveCity(convertFrom(result));
         Optional<Request> request = requestService.getRequestById(result.getRequestId());
-        if(request.isPresent()){
-           if(cityService.checkRequestStatus(request.get())) {
-               if(request.get().getStatus().equals(Status.READY)) {
-                   System.out.println("Request with id: " + result.getRequestId() + " is ready");
-               }
-           }
-        }
+        request.ifPresent(cityService::checkRequestStatus);
     }
 
-    private City convertFrom(CityDto cityDto) {
+    private City convertFrom(CityDto cityDto)
+    {
         return City.builder()
                 .cityName(cityDto.getCityName())
                 .cityResults(

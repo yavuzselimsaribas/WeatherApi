@@ -13,5 +13,5 @@ public interface ICityService {
 
     Page<City> getHistoricalCityAirData(String cityName, LocalDate finalStartDate, LocalDate finalEndDate, Pageable pageable);
 
-    boolean checkRequestStatus(Request request);
+    void checkRequestStatus(Request request);
 }

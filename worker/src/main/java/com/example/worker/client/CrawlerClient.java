@@ -8,11 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,17 +59,20 @@ public class CrawlerClient implements ICrawlerClient{
             ParameterizedTypeReference<JsonNode> responseType = new ParameterizedTypeReference<>() {};
             JsonNode response = httpRequestExecutor.executeCityGetRequest(apiUrl, responseType);
             List<CityDto> cityDtoList = new ArrayList<>();
-            if(response != null && response.has("list")){
+            if(response != null && response.has("list"))
+            {
                 JsonNode list = response.get("list");
                 LocalDate currentDate = null;
                 CityDto cityDto = null;
 
-                for(JsonNode node : list){
+                for(JsonNode node : list)
+                {
                     long dt = node.get("dt").asLong();
                     LocalDate date = unixToDateConverter.convertUnixToDate(dt);
 
                     // if date is different than current date, create new cityDto
-                    if(currentDate == null || !currentDate.equals(date)){
+                    if(currentDate == null || !currentDate.equals(date))
+                    {
                         currentDate = date;
                         cityDto = CityDto.builder()
                                 .requestId(requestId)
@@ -96,12 +95,14 @@ public class CrawlerClient implements ICrawlerClient{
                     }
                 }
             }
-            else {
+            else
+            {
                 log.warn("No result found for city: {}", cityName);
                 return null;
             }
             return cityDtoList;
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             log.error("Error while fetching air quality data for city: " + cityName, e);
             return null;
