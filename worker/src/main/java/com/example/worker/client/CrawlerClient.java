@@ -5,6 +5,7 @@ import com.example.common.dto.CoordinateDto;
 import com.example.common.dto.IUnixToDateConverter;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CrawlerClient implements ICrawlerClient{
 
-    private final String apiKey = "885fb87562e9af60c0251ef7eaf8ec16";
+    @Value("${openweathermap.api-key}")
+    private String apiKey;
 
     private final IHttpRequestExecutor httpRequestExecutor;
 
@@ -33,7 +35,7 @@ public class CrawlerClient implements ICrawlerClient{
             ParameterizedTypeReference<List<CoordinateDto>> responseType = new ParameterizedTypeReference<>() {
             };
             List<CoordinateDto> resultList = httpRequestExecutor.executeGetRequest(apiUrl, responseType);
-            if (resultList != null && resultList.size() > 0)
+            if (resultList != null && !resultList.isEmpty())
             {
                 return resultList.get(0);
             }

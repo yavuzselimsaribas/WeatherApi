@@ -57,7 +57,8 @@ export default {
         startDate?: string,
         endDate?: string,
         page?: number,      // Add page parameter for pagination
-        pageSize?: number   // Add pageSize parameter for pagination
+        pageSize?: number, // Add pageSize parameter for pagination
+        sortDirection?: string,
     ): Promise<AxiosResponse<CityResponse>> {
         // Create the query string for the request, including the page and pageSize parameters
         let queryString = `/cities/${cityName}?startDate=${startDate}&endDate=${endDate}`;
@@ -67,8 +68,9 @@ export default {
         if (pageSize !== undefined) {
             queryString += `&size=${pageSize}`;
         }
-
-        console.log("Requesting for city: " + cityName + " for dates: " + startDate + " and " + endDate);
+        if (sortDirection !== undefined) {
+            queryString += `&sortDirection=${sortDirection}`;
+        }
         return axiosInstance.get<CityResponse>(queryString);
     }
 

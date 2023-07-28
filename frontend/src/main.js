@@ -2,8 +2,9 @@ import './assets/main.css';
 import { createApp } from 'vue';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
-import Antd from "ant-design-vue";
-import "ant-design-vue/dist/reset.css";
+import Antd from 'ant-design-vue';
+import 'ant-design-vue/dist/reset.css';
+// import './index.css'
 
 import App from './App.vue';
 

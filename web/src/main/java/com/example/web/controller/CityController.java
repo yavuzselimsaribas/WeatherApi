@@ -14,7 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
-
+import java.util.Objects;
 
 
 @Slf4j
@@ -34,14 +34,21 @@ public class CityController {
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) int page,
-            @RequestParam(required = false) int size)
+            @RequestParam(required = false) int size,
+            @RequestParam(required = false) Sort.Direction sortDirection)
     {
         if (startDate == null || endDate == null)
         {
             endDate = LocalDate.now();
             startDate = endDate.minusDays(7);
         }
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "cityResults.date"));
+
+        if(Objects.isNull(sortDirection))
+        {
+            sortDirection = Sort.Direction.ASC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, "cityResults.date"));
 
         // Check if there is an existing request for the same city and dates
         if (requestService.existsByCityNameAndStartDateAndEndDate(cityName, startDate, endDate))
@@ -53,12 +60,12 @@ public class CityController {
                 LocalDate finalStartDate = startDate;
                 if(cityPage.stream().anyMatch(city -> city.getCityResults().getDate().isEqual(finalStartDate)))
                 {
-                   log.info("Even though the request is pending, requested pages are ready in the database. Returning the data.");
-                   return ResponseEntity.ok(CityResponse.builder()
-                           .status(Status.READY)
-                           .cities(cityPage.getContent())
-                           .totalCount(cityPage.getTotalElements())
-                           .build());
+                        log.info("Even though the request is pending, requested pages are ready in the database. Returning the data.");
+                        return ResponseEntity.ok(CityResponse.builder()
+                                .status(Status.READY)
+                                .cities(cityPage.getContent())
+                                .totalCount(cityPage.getTotalElements())
+                                .build());
                }
                 return ResponseEntity.ok(CityResponse.builder().status(request.getStatus()).build());
             }

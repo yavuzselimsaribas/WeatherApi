@@ -2,8 +2,6 @@ package com.example.web.controller;
 
 
 import com.example.web.model.CityCoordinates;
-import com.example.web.model.Request;
-import com.example.web.model.Status;
 import com.example.web.service.coordinate.ICoordinateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
