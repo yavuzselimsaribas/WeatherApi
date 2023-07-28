@@ -49,7 +49,7 @@
 
 ## <div align="center"><h4 style="line-height: 1.5; color: white">Example Response</h4></div>
 
-![My-image](common/src/main/resources/Capture.PNG)
+![My-image](common/src/main/resources/screenshot.PNG)
 
 ```bson
 {
